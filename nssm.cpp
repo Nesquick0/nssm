@@ -266,18 +266,35 @@ int _tmain(int argc, TCHAR **argv) {
       _tprintf(_T("%s %s %s %s\n"), NSSM, NSSM_VERSION, NSSM_CONFIGURATION, NSSM_DATE);
       nssm_exit(0);
     }
-    if (str_equiv(argv[1], _T("start"))) nssm_exit(control_service(NSSM_SERVICE_CONTROL_START, argc - 2, argv + 2));
-    if (str_equiv(argv[1], _T("stop"))) nssm_exit(control_service(SERVICE_CONTROL_STOP, argc - 2, argv + 2));
-    if (str_equiv(argv[1], _T("restart"))) {
-      int ret = control_service(SERVICE_CONTROL_STOP, argc - 2, argv + 2);
-      if (ret) nssm_exit(ret);
-      nssm_exit(control_service(NSSM_SERVICE_CONTROL_START, argc - 2, argv + 2));
-    }
-    if (str_equiv(argv[1], _T("pause"))) nssm_exit(control_service(SERVICE_CONTROL_PAUSE, argc - 2, argv + 2));
-    if (str_equiv(argv[1], _T("continue"))) nssm_exit(control_service(SERVICE_CONTROL_CONTINUE, argc - 2, argv + 2));
-    if (str_equiv(argv[1], _T("status"))) nssm_exit(control_service(SERVICE_CONTROL_INTERROGATE, argc - 2, argv + 2));
-    if (str_equiv(argv[1], _T("statuscode"))) nssm_exit(control_service(SERVICE_CONTROL_INTERROGATE, argc - 2, argv + 2, true));
-    if (str_equiv(argv[1], _T("rotate"))) nssm_exit(control_service(NSSM_SERVICE_CONTROL_ROTATE, argc - 2, argv + 2));
+    if (str_equiv(argv[1], _T("start"))) {
+			service_main(argc - 2, argv + 2);
+			while (true)
+			{
+				Sleep(10000);
+			}
+			nssm_exit(0);
+		}
+    if (str_equiv(argv[1], _T("stop"))) {
+ 			TCHAR cmd[CMD_LENGTH];
+ 			if (_sntprintf_s(cmd, _countof(cmd), _TRUNCATE, _T("pynssmkiller.exe \"%s\""), argv[2]) >= 0) {
+				char cmdN[CMD_LENGTH];
+				size_t cmdI;
+				wcstombs_s(&cmdI, cmdN, cmd, wcslen(cmd) + 1);
+				system(cmdN);
+				nssm_exit(0);
+			}
+			nssm_exit(1);
+		}
+    //if (str_equiv(argv[1], _T("restart"))) {
+    //  int ret = control_service(SERVICE_CONTROL_STOP, argc - 2, argv + 2);
+    //  if (ret) nssm_exit(ret);
+    //  nssm_exit(control_service(NSSM_SERVICE_CONTROL_START, argc - 2, argv + 2));
+    //}
+    //if (str_equiv(argv[1], _T("pause"))) nssm_exit(control_service(SERVICE_CONTROL_PAUSE, argc - 2, argv + 2));
+    //if (str_equiv(argv[1], _T("continue"))) nssm_exit(control_service(SERVICE_CONTROL_CONTINUE, argc - 2, argv + 2));
+    //if (str_equiv(argv[1], _T("status"))) nssm_exit(control_service(SERVICE_CONTROL_INTERROGATE, argc - 2, argv + 2));
+    //if (str_equiv(argv[1], _T("statuscode"))) nssm_exit(control_service(SERVICE_CONTROL_INTERROGATE, argc - 2, argv + 2, true));
+    //if (str_equiv(argv[1], _T("rotate"))) nssm_exit(control_service(NSSM_SERVICE_CONTROL_ROTATE, argc - 2, argv + 2));
     if (str_equiv(argv[1], _T("install"))) {
       if (! is_admin) nssm_exit(elevate(argc, argv, NSSM_MESSAGE_NOT_ADMINISTRATOR_CANNOT_INSTALL));
       create_messages();
